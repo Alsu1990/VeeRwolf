@@ -26,7 +26,7 @@
 
 #include <jtagServer.h>
 
-#include "verilated_vcd_c.h"
+#include "verilated_fst_c.h"
 #include "Vveerwolf_core_tb.h"
 
 using namespace std;
@@ -104,11 +104,11 @@ int main(int argc, char **argv, char **env)
   bool gpio0 = false;
   Vveerwolf_core_tb* top = new Vveerwolf_core_tb;
 
-  VerilatedVcdC * tfp = 0;
+  VerilatedFstC * tfp = 0;
   const char *vcd = Verilated::commandArgsPlusMatch("vcd=");
   if (vcd[0]) {
     Verilated::traceEverOn(true);
-    tfp = new VerilatedVcdC;
+    tfp = new VerilatedFstC;
     top->trace (tfp, 99);
     tfp->open ("trace.vcd");
   }

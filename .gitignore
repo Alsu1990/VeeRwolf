@@ -1,1 +1,6 @@
 sw/veerwolf_zephyr_demo/build
+fusesoc_libraries/
+build/
+.venv*
+.nvim/
+fusesoc.conf

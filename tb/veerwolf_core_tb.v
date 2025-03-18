@@ -60,7 +60,7 @@ module veerwolf_core_tb
 
    reg [1023:0] ram_init_file;
 
-   initial begin
+    initial begin
       if (|$test$plusargs("jtag_vpi_enable"))
 	      $display("JTAG VPI enabled. Not loading RAM");
       else if ($value$plusargs("ram_init_file=%s", ram_init_file)) begin
@@ -185,7 +185,7 @@ module veerwolf_core_tb
       .s_axi_rvalid (ram_rvalid),
       .s_axi_rready (ram_rready));
 
-   dmi_wrapper dmi_wrapper
+   dmi_wrapper i_dmi_wrapper
      (.trst_n    (i_jtag_trst_n),
       .tck       (i_jtag_tck),
       .tms       (i_jtag_tms),

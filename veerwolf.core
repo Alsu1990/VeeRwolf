@@ -179,7 +179,7 @@ targets:
           - -svinputport=compat
           - -suppress 2583
       verilator:
-        verilator_options : [--trace, -Wno-fatal]
+        verilator_options : [--trace, --trace-fst, -Wno-fatal]
       xsim:
         compilation_mode : common
         #-d XSIM is required to disable formal properties in axi & common_cells
