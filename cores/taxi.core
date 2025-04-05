@@ -21,6 +21,18 @@ filesets:
       - rtl/axi/taxi_axil_register_wr.sv
     file_type: systemVerilogSource
 
+targets:
+  default:
+    filesets:
+      - axi
+    toplevel: taxi_axi_ram
+
+    flow: sim
+    flow_options:
+      tool: verilator
+      mode: lint-only
+      
+
 provider:
   name: github
   user: fpganinja

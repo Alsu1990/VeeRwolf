@@ -1,7 +1,7 @@
 CAPI=2:
 
-name : chipsalliance.org:cores:VeeR_EH1:1.9
-description : VeeR EH1 RISC-V Core
+name: chipsalliance.org:cores:VeeR_EH1:1.9
+description: VeeR EH1 RISC-V Core
 
 filesets:
   rtl:
@@ -49,106 +49,106 @@ filesets:
       - design/lib/axi4_to_ahb.sv
       - design/veer.sv
       - design/veer_wrapper.sv
-    file_type : systemVerilogSource
+    file_type: systemVerilogSource
 
   includes:
     files:
-      - design/include/build.h : {is_include_file : true}
-      - design/include/global.h : {is_include_file : true}
-    file_type : systemVerilogSource
+      - design/include/build.h: { is_include_file: true }
+      - design/include/global.h: { is_include_file: true }
+    file_type: systemVerilogSource
 
   mem_init:
     files:
-      - testbench/hex/data.hex : {copyto : data.hex}
-      - testbench/hex/program.hex : {copyto : program.hex}
-    file_type : user
+      - testbench/hex/data.hex: { copyto: data.hex }
+      - testbench/hex/program.hex: { copyto: program.hex }
+    file_type: user
 
   tb:
     files: [testbench/ahb_sif.sv, testbench/tb_top.sv]
-    file_type : systemVerilogSource
+    file_type: systemVerilogSource
 
   verilator_tb:
-    files : [testbench/test_tb_top.cpp : {file_type : cppSource}]
+    files: [testbench/test_tb_top.cpp: { file_type: cppSource }]
 
-  vivado_tcl: {files: [tools/vivado.tcl : {file_type : tclSource}]}
+  vivado_tcl: { files: [tools/vivado.tcl: { file_type: tclSource }] }
 
 targets:
   default:
-    filesets :
+    filesets:
       - includes
       - rtl
       - "tool_vivado ? (vivado_tcl)"
   lint:
     default_tool: verilator
-    filesets : [includes, rtl]
-    generate : [veer_default_config]
+    filesets: [includes, rtl]
+    generate: [veer_default_config]
     tools:
-      verilator :
-        mode : lint-only
-    toplevel : veer_wrapper
+      verilator:
+        mode: lint-only
+    toplevel: veer_wrapper
 
   sim:
-    default_tool : verilator
-    filesets :
+    default_tool: verilator
+    filesets:
       - includes
       - rtl
       - mem_init
       - tb
       - "tool_verilator? (verilator_tb)"
 
-    generate : [veer_ahb_config]
+    generate: [veer_ahb_config]
     tools:
       modelsim:
-        vlog_options :
+        vlog_options:
           - -mfcu
           - -cuautoname=du
           - config/common_defines.vh
       rivierapro:
-        vlog_options :
+        vlog_options:
           - config/common_defines.vh
           - "-err VCP2694 W1"
-        compilation_mode : common
+        compilation_mode: common
       verilator:
-        verilator_options : [--trace, -Wno-fatal]
-    toplevel : tb_top
+        verilator_options: [--trace, -Wno-fatal]
+    toplevel: tb_top
 
   synth:
-    default_tool : vivado
-    filesets : [includes, rtl, "tool_vivado? (vivado_tcl)"]
-    generate : [veer_fpga_config]
+    default_tool: vivado
+    filesets: [includes, rtl, "tool_vivado? (vivado_tcl)"]
+    generate: [veer_fpga_config]
     tools:
       vivado:
-        part : xc7a100tcsg324-1
-        pnr  : none
-    toplevel : veer_wrapper
+        part: xc7a100tcsg324-1
+        pnr: none
+    toplevel: veer_wrapper
 
 generate:
   veer_ahb_config:
     generator: veer_eh1_config
-    position : first
+    position: first
     parameters:
-      args : ['-ahb_lite', -unset=assert_on]
+      args: ["-ahb_lite", -unset=assert_on]
 
   veer_default_config:
     generator: veer_eh1_config
-    position : first
+    position: first
     parameters:
-      args : [-unset=assert_on]
+      args: [-unset=assert_on]
 
   veer_fpga_config:
     generator: veer_eh1_config
-    position : first
+    position: first
     parameters:
-      args : [-unset=assert_on, -set=fpga_optimize=1]
+      args: [-unset=assert_on, -set=fpga_optimize=1]
 
 generators:
   veer_eh1_config:
     interpreter: python3
     command: configs/veer_config_gen.py
-    description : Create a VeeR configuration. Note! Only supports the default config
+    description: Create a VeeR configuration. Note! Only supports the default config
 
 provider:
-  name    : github
-  user    : chipsalliance
-  repo    : Cores-VeeR-EH1
-  version : 915fb34a5b38ef14c5d5c05431765ad8b912bc3
+  name: github
+  user: chipsalliance
+  repo: Cores-VeeR-EH1
+  version: 915fb34a5b38ef14c5d5c05431765ad8b912bc3
