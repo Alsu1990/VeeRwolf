@@ -19,7 +19,7 @@ get_os() {
 }
 
 case $(get_os) in
-ubuntu|darwin)
+ubuntu | darwin)
     base_python=$(which python3)
     ;;
 debian)
@@ -57,10 +57,10 @@ if [[ "${python_major_version}" != "3" ]]; then
 fi
 
 python_minor_version=$(echo "${python_version}" | cut -f2 -d.)
-if [[ "${python_minor_version}" -le 10 ]]; then
-    echo "error: unsupported python version: ${python_version}" >/dev/stderr
-    exit 1
-fi
+# if [[ "${python_minor_version}" -le 10 ]]; then
+#     echo "error: unsupported python version: ${python_version}" >/dev/stderr
+#     exit 1
+# fi
 echo "base python: ${base_python} (v${python_version})"
 
 hostname=$(hostname -s)

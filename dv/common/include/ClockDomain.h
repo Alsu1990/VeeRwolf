@@ -2,7 +2,6 @@
 
 #include "common.h"
 #include "verilated.h"
-#include <vector>
 
 class ClockDomain : public TimeProcess {
 

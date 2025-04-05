@@ -1,0 +1,28 @@
+CAPI=2:
+
+name: fpganinja:taxi:toplevel:0.1
+description: AXI, AXI stream, Ethernet, and PCIe components in System Verilog.
+
+filesets:
+  axi:
+    files:
+      - rtl/axi/taxi_axi_if.sv
+      - rtl/axi/taxi_axi_ram.sv
+      - rtl/axi/taxi_axi_register.f
+      - rtl/axi/taxi_axi_register.sv
+      - rtl/axi/taxi_axi_register_rd.sv
+      - rtl/axi/taxi_axi_register_wr.sv
+      - rtl/axi/taxi_axil_dp_ram.sv
+      - rtl/axi/taxi_axil_if.sv
+      - rtl/axi/taxi_axil_ram.sv
+      - rtl/axi/taxi_axil_register.f
+      - rtl/axi/taxi_axil_register.sv
+      - rtl/axi/taxi_axil_register_rd.sv
+      - rtl/axi/taxi_axil_register_wr.sv
+    file_type: systemVerilogSource
+
+provider:
+  name: github
+  user: fpganinja
+  repo: taxi
+  version: df87998a1b9a4e73ad6302e7cb461baf46a73455

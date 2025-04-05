@@ -1,4 +1,5 @@
 
+#include "common.hpp"
 #include "verilated_fst_c.h"
 #include <cstring>
 #include <fstream>
@@ -14,81 +15,49 @@
 
 using namespace std;
 
-class SimElement {
-public:
-    virtual ~SimElement() { }
-    virtual void onReset() { }
-    virtual void postReset() { }
-    virtual void preCycle() { }
-    virtual void postCycle() { }
-};
+void TimeProcess::schedule(uint64_t delay)
+{
+    this->wakeDelay = delay;
+    this->wakeEnable = true;
+}
 
-class TimeProcess {
-public:
-    uint64_t wakeDelay = 0;
-    bool wakeEnable = false;
-    virtual ~TimeProcess() { }
-    virtual void schedule(uint64_t delay)
-    {
-        wakeDelay = delay;
-        wakeEnable = true;
-    }
-    virtual void tick()
-    {
-    }
-};
+ClockDomain::ClockDomain(CData* clk, CData* reset, uint64_t period, uint64_t delay)
+{
+    this->clk = clk;
+    this->reset = reset;
+    *clk = 0;
+    this->tooglePeriod = period / 2;
+    schedule(delay);
+}
 
-class SensitiveProcess {
-public:
-    virtual ~SensitiveProcess() { }
-    virtual void tick(uint64_t time)
-    {
-    }
-};
-
-class ClockDomain : public TimeProcess {
-public:
-    CData* clk;
-    CData* reset;
-    uint64_t tooglePeriod;
-    vector<SimElement*> simElements;
-    ClockDomain(CData* clk, CData* reset, uint64_t period, uint64_t delay)
-    {
-        this->clk = clk;
-        this->reset = reset;
-        *clk = 0;
-        this->tooglePeriod = period / 2;
-        schedule(delay);
-    }
-
-    bool postCycle = false;
-    virtual void tick()
-    {
-        if (*clk == 0) {
-            for (SimElement* simElement : simElements) {
-                simElement->preCycle();
-            }
-            postCycle = true;
-            *clk = 1;
-            schedule(0);
-        } else {
-            if (postCycle) {
-                postCycle = false;
-                for (SimElement* simElement : simElements) {
-                    simElement->postCycle();
-                }
-            } else {
-                *clk = 0;
-            }
-            schedule(tooglePeriod);
+void ClockDomain::tick()
+{
+    if (*clk == 0) {
+        for (SimElement* simElement : simElements) {
+            simElement->preCycle();
         }
+        postCycle = true;
+        *clk = 1;
+        schedule(0);
+    } else {
+        if (postCycle) {
+            postCycle = false;
+            for (SimElement* simElement : simElements) {
+                simElement->postCycle();
+            }
+        } else {
+            *clk = 0;
+        }
+        schedule(tooglePeriod);
     }
+}
 
-    void add(SimElement* that)
-    {
-        simElements.push_back(that);
-    }
-};
+void ClockDomain::add(SimElement* that)
+{
+    this->simElements.push_back(that);
+}
+
+
 
 class AsyncReset : public TimeProcess {
 public:
