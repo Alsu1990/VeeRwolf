@@ -1,106 +1,64 @@
 CAPI=2:
 
-name : ::veerwolf_dv
-description : Reference SoC for the VeeR family of cores
+name: ::veerwolf_dv
+description: Reference SoC for the VeeR family of cores
 
 filesets:
-  el2:
-    files: [rtl/veer_el2_wrapper.sv : {file_type : systemVerilogSource}]
-    depend: ["=chipsalliance.org:cores:VeeR_EL2:1.4"]
-
-  core:
-    files:
-      # - rtl/dpram64.v
-      - rtl/axi2wb.v
-      - rtl/wb_mem_wrapper.v
-      - rtl/veerwolf_syscon.v
-      - rtl/veerwolf_core.v
-    file_type : systemVerilogSource
-    depend :
-      - fusesoc:utils:generators
-      - uart16550
-      - ">=pulp-platform.org::axi:0.23.0-r1"
-      - simple_spi
-      - ::wb_intercon:1.4.1
-      - ">=fpganinja:taxi:toplevel:0.1"
-
-  bfm:
-    files:
-      - tb/uart_decoder.v
-    file_type : verilogSource
-
   tb:
     files:
-      - sw/hello.vh : {file_type : user, copyto : hello.vh}
-      - rtl/axi_ram.v : {file_type : verilogSource}
-      - tb/veerwolf_core_tb.v : {file_type : systemVerilogSource}
+      - soc/sw/hello.vh: { file_type: user, copyto: hello.vh }
+      - soc/tb/soc_tb.sv: { file_type: systemVerilogSource }
+    depend:
+      - fusesoc:utils:generators
+      - veerwolf_soc
+      - ::wb_intercon:1.4.1
+      - ">=pulp-platform.org::axi:0.23.0-r1"
+      - uart16550
+      - ">=fpganinja:taxi:toplevel:0.1"
+      - chipsalliance.org:cores:VeeR_EL2:1.4
 
   verilator_tb:
-    files: [tb/tb.cpp : {file_type : cppSource}]
-    depend : [">=::jtag_vpi:0-r5"]
-  verilator_waiver: {files: [data/verilator_waiver.vlt : {file_type : vlt}]}
-
-  bootrom:
-    files :
-      - sw/bootloader.vh : {file_type : user, copyto : bootloader.vh}
+    files: [soc/tb/tb.cpp: { file_type: cppSource }]
+    # depend: [">=::jtag_vpi:0-r5"]
+  verilator_waiver: { files: [verilator_waiver.vlt: { file_type: vlt }] }
 
 targets:
-
-  lint:
-    default_tool : verilator
-    description : Run static code checks (linting)
-    filesets :
-      - "cpu_el2? (el2)"
-      - "!cpu_el2? (eh1)"
-      - core
-      - bootrom
-      - "tool_verilator? (verilator_waiver)"
-
-    generate : [intercon, "cpu_el2? (veer_el2_default_config)", "!cpu_el2? (veer_eh1_default_config)", version, wb_intercon]
-    parameters : [rom_init_file]
-    tools:
-      verilator:
-        mode: lint-only
-    toplevel : veerwolf_core
-
   sim:
-    default_tool : verilator
-    description : Default simulation target
-    filesets :
-      - "cpu_el2? (el2)"
-      - "!cpu_el2? (eh1)"
-      - core
-      - "!tool_verilator? (bfm)"
+    default_tool: verilator
+    description: Default simulation target
+    filesets:
       - tb
-      - bootrom
       - "tool_verilator? (verilator_tb)"
       - "tool_verilator? (verilator_waiver)"
 
-    generate : [intercon, "cpu_el2? (veer_el2_default_config)", "!cpu_el2? (veer_eh1_default_config)", version, wb_intercon]
-    parameters : [SIMPRINT=true, jtag_vpi_enable, ram_init_file=hello.vh, rom_init_file, signature, timeout, vcd]
+    generate: [intercon, veer_el2_default_config, version, wb_intercon]
+    parameters:
+      [
+        SIMPRINT=true,
+        jtag_vpi_enable,
+        ram_init_file=hello.vh,
+        rom_init_file,
+        signature,
+        timeout,
+        vcd,
+      ]
     tools:
-      rivierapro:
-        vlog_options :
-          - config/common_defines.vh
-          - -timescale 1ns/1ps
-        compilation_mode : common
-      modelsim:
-        vlog_options :
-          - -mfcu
-          - -cuautoname=du
-          - src/pulp-platform.org__axi_0.25.0/include/axi/typedef.svh #Shady temporary workaround
-          - config/common_defines.vh
-          - -timescale 1ns/1ns
-          - -svinputport=compat
-          - -suppress 2583
       verilator:
-        verilator_options : [--trace, --trace-fst, -Wno-fatal]
+        verilator_options:
+          [
+            --trace,
+            --trace-fst,
+            -Wno-fatal,
+            -Wno-TIMESCALEMOD,
+            -Wno-UNOPTFLAT,
+            -CFLAGS "-Wno-error=logical-op",
+          ]
       xsim:
-        compilation_mode : common
+        compilation_mode: common
         #-d XSIM is required to disable formal properties in axi & common_cells
         #For interactive wave debug, also add "-debug all" or "-debug typical"
-        xelab_options : [-d, XSIM]
-    toplevel : veerwolf_core_tb
+        xelab_options: [-d, XSIM]
+    toplevel: soc_tb
 
 generate:
   wb_intercon:
@@ -108,148 +66,111 @@ generate:
     parameters:
       masters:
         io:
-          slaves : [rom, sys, spi_flash, uart]
+          slaves: [rom, sys, spi_flash, uart]
       slaves:
         rom:
-          offset : 0x00000000
-          size   : 0x00001000
+          offset: 0x00000000
+          size: 0x00001000
         sys:
-          offset : 0x00001000
-          size   : 0x00000040
+          offset: 0x00001000
+          size: 0x00000040
         spi_flash:
-          offset : 0x00001040
-          size   : 0x00000040
+          offset: 0x00001040
+          size: 0x00000040
         uart:
-          offset : 0x00002000
-          size   : 0x00001000
+          offset: 0x00002000
+          size: 0x00001000
   intercon:
     generator: axi_intercon_gen
     parameters:
       masters:
         ifu:
-          id_width : 3
-          read_only : true
+          id_width: 3
+          read_only: true
         lsu:
-           # This value is really dependent on the number of outstanding LSU
-           # loads (lsu_num_nbload in the veer config), but since we don't
-           # have access to that value here, we hardcode it to the worst-case
-           # value of four and hope that the synthesis tools will optimize
-           # away the unused bits.
-          id_width : 4
+          # This value is really dependent on the number of outstanding LSU
+          # loads (lsu_num_nbload in the veer config), but since we don't
+          # have access to that value here, we hardcode it to the worst-case
+          # value of four and hope that the synthesis tools will optimize
+          # away the unused bits.
+          id_width: 4
         sb:
-          id_width : 1
+          id_width: 1
       slaves:
         io:
-          offset : 0x80000000
-          size   : 0x00004000
+          offset: 0x80000000
+          size: 0x00004000
         ram:
-          offset : 0x00000000
-          size   : 0x08000000 #128MiB
-
-  veer_eh1_default_config:
-    generator: veer_eh1_config
-    position : first
-    parameters:
-      args : [-unset=assert_on, -set=reset_vec=0x80000000, -set=fpga_optimize=1]
+          offset: 0x00000000
+          size: 0x08000000 #128MiB
 
   veer_el2_default_config:
     generator: veer_el2_config
-    position : first
+    position: first
     parameters:
-      args : [-unset=assert_on, -set=reset_vec=0x80000000, -set=fpga_optimize=1, -set=pic_total_int=8]
+      args:
+        [
+          -unset=assert_on,
+          -set=reset_vec=0x80000000,
+          -set=fpga_optimize=1,
+          -set=pic_total_int=8,
+        ]
 
-  veer_el2_nexys_a7_config:
-    generator: veer_el2_config
-    position : first
-    parameters:
-      args :
-        - -unset=assert_on
-        - -set=reset_vec=0x80000000
-        - -set=ret_stack_size=2
-        - -set=btb_size=32
-        - -set=bht_size=128
-        - -set=dccm_size=16
-        - -set=dccm_num_banks=2
-        - -set=iccm_enable=0
-        - -set=icache_enable=0
-        - -set=dccm_enable=0
-        - -set=pic_total_int=8
-
-  veer_el2_arty_a7_config:
-    generator: veer_el2_config
-    position : first
-    parameters:
-      args :
-        - -unset=assert_on
-        - -set=reset_vec=0x80000000
-        - -set=ret_stack_size=2
-        - -set=btb_enable=0
-        - -set=btb_size=8
-        - -set=bht_size=32
-        - -set=dccm_size=16
-        - -set=dccm_num_banks=2
-        - -set=iccm_enable=0
-        - -set=icache_enable=0
-        - -set=dccm_enable=0
-        - -set=dma_buf_depth=2
-        - -set=div_bit=1
-        - -set=pic_total_int=8
-
-# - -target=default_ahb
+  # - -target=default_ahb
 
   version:
     generator: gitversion
 
 parameters:
   SIMPRINT:
-    datatype    : bool
-    description : Enable simulation character output
-    paramtype   : vlogdefine
+    datatype: bool
+    description: Enable simulation character output
+    paramtype: vlogdefine
 
   cpu_type:
-    datatype    : str
-    description : Controls whether to use VeeR EH1 or VeeR EL2. Implicitly set by the target
-    paramtype   : vlogparam
+    datatype: str
+    description: Controls whether to use VeeR EH1 or VeeR EL2. Implicitly set by the target
+    paramtype: vlogparam
 
   mem_clear:
-    datatype    : bool
-    description : Initialize on-chip RAM to zero on simulation start
-    paramtype   : vlogparam
+    datatype: bool
+    description: Initialize on-chip RAM to zero on simulation start
+    paramtype: vlogparam
 
   bootrom_file:
     datatype: file
-    description : Verilog hex file to use as boot ROM
-    paramtype : vlogparam
+    description: Verilog hex file to use as boot ROM
+    paramtype: vlogparam
 
   jtag_vpi_enable:
-    datatype : bool
-    description : Enable JTAG simulation server
-    paramtype : plusarg
+    datatype: bool
+    description: Enable JTAG simulation server
+    paramtype: plusarg
 
   ram_init_file:
     datatype: file
-    description : Verilog hex file to use as initial on-chip RAM contents
-    paramtype : plusarg
+    description: Verilog hex file to use as initial on-chip RAM contents
+    paramtype: plusarg
 
   rom_init_file:
     datatype: file
-    description : Verilog hex file to use as initial bootrom RAM contents
-    paramtype : plusarg
+    description: Verilog hex file to use as initial bootrom RAM contents
+    paramtype: plusarg
 
   flash_init_file:
     datatype: file
-    description : Verilog hex file to use as initial SPI Flash contents
-    paramtype : vlogparam
+    description: Verilog hex file to use as initial SPI Flash contents
+    paramtype: vlogparam
 
   signature:
-    datatype : file
-    paramtype : plusarg
+    datatype: file
+    paramtype: plusarg
 
   timeout:
-    datatype : int
-    paramtype : plusarg
+    datatype: int
+    paramtype: plusarg
 
   vcd:
-    datatype : bool
-    description : Dump VCD
-    paramtype : plusarg
+    datatype: bool
+    description: Dump VCD
+    paramtype: plusarg

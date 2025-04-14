@@ -1,4 +1,5 @@
-TOOLCHAIN_PREFIX ?= riscv64-unknown-elf-
+# TOOLCHAIN_PREFIX ?= riscv64-unknown-elf-
+TOOLCHAIN_PREFIX ?= riscv64-zephyr-elf-
 RESET_VECTOR ?= 0
 FLASH_ADDR ?= 0x0
 

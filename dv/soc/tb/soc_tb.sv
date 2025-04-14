@@ -22,7 +22,7 @@
 //********************************************************************************
 
 `default_nettype none
-module top_tb #(
+module soc_tb #(
     parameter bootrom_file = ""
 ) (
     input  wire        clk,
@@ -87,7 +87,7 @@ module top_tb #(
     ) axi_if ();
 
     taxi_axi_ram #(
-        .ADDR_WIDTH(),
+        .ADDR_W(),
         .PIPELINE_OUTPUT(1'b1)
     ) ram (
         .clk     (clk),

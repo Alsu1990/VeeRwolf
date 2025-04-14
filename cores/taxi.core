@@ -8,14 +8,12 @@ filesets:
     files:
       - rtl/axi/taxi_axi_if.sv
       - rtl/axi/taxi_axi_ram.sv
-      - rtl/axi/taxi_axi_register.f
       - rtl/axi/taxi_axi_register.sv
       - rtl/axi/taxi_axi_register_rd.sv
       - rtl/axi/taxi_axi_register_wr.sv
       - rtl/axi/taxi_axil_dp_ram.sv
       - rtl/axi/taxi_axil_if.sv
       - rtl/axi/taxi_axil_ram.sv
-      - rtl/axi/taxi_axil_register.f
       - rtl/axi/taxi_axil_register.sv
       - rtl/axi/taxi_axil_register_rd.sv
       - rtl/axi/taxi_axil_register_wr.sv
